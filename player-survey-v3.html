@@ -396,7 +396,7 @@ function beginScan(){
 
 // ── CLAUDE API ─────────────────────────────────
 async function callClaude(messages){
-  const res=await fetch('contest-server-production-36c0.up.railway.app/api/chat',{
+  const res=await fetch('https://contest-server-production-36c0.up.railway.app/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:SYSTEM_PROMPT,messages})
