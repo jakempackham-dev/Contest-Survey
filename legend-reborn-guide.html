@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legend Reborn — Player Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #07090c;
+  --bg2: #0c1014;
+  --bg3: #111620;
+  --border: #1a2030;
+  --border-hi: #243040;
+  --green: #00ff88;
+  --green-dim: #00b860;
+  --green-lo: #002a18;
+  --amber: #ffbb00;
+  --amber-lo: #221800;
+  --amber-dim: #c48900;
+  --red: #ff3355;
+  --red-lo: #220010;
+  --text: #ccd8e8;
+  --muted: #5a7090;
+  --faint: #1e2d40;
+  --mono: 'Space Mono', monospace;
+  --display: 'Syne', sans-serif;
+  --body: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+}
+
+/* ── SKIP NAV ── */
+.skip-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border-hi);
+  padding: 10px 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: -40px -32px 40px;
+  padding: 10px 32px;
+}
+.skip-nav-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.skip-link {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 2px;
+  border: 1px solid;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+}
+.skip-link.fast {
+  background: var(--green-lo);
+  border-color: var(--green-dim);
+  color: var(--green);
+}
+.skip-link.fast:hover { background: var(--green-dim); color: var(--bg); }
+.skip-link.full {
+  background: var(--amber-lo);
+  border-color: var(--amber-dim);
+  color: var(--amber);
+}
+.skip-link.full:hover { background: var(--amber-dim); color: var(--bg); }
+
+/* ── TRACK BADGES ── */
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+.track-badge.fast {
+  background: var(--green-lo);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+}
+.track-badge.full {
+  background: var(--amber-lo);
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+}
+.track-badge::before {
+  content: '▶';
+  font-size: 7px;
+}
+
+/* ── SECTION CONTAINERS ── */
+.fast-track { /* no special styling — interwoven */ }
+.full-brief {
+  border-left: 2px solid var(--amber-dim);
+  padding-left: 20px;
+  margin-left: 4px;
+}
+
+/* ── COVER ── */
+.cover {
+  text-align: center;
+  padding: 60px 0 48px;
+  border-bottom: 1px solid var(--border-hi);
+  margin-bottom: 48px;
+}
+.cover-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--green-dim);
+  margin-bottom: 16px;
+}
+.cover-title {
+  font-family: var(--display);
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.cover-title span { color: var(--green); }
+.cover-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.cover-tagline {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 560px;
+  margin: 0 auto 24px;
+  line-height: 1.4;
+}
+.cover-tagline em { color: var(--green); font-style: normal; }
+.cover-note {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 440px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── HOW TO READ ── */
+.how-to-read {
+  background: var(--bg2);
+  border: 1px solid var(--border-hi);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 48px;
+}
+.how-to-read h3 {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.track-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.track-row:last-child { margin-bottom: 0; }
+.track-pill {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.track-pill.fast { background: var(--green-lo); border: 1px solid var(--green-dim); color: var(--green); }
+.track-pill.full { background: var(--amber-lo); border: 1px solid var(--amber-dim); color: var(--amber); }
+.track-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── SECTION HEADERS ── */
+.section-marker {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--green-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  margin-top: 48px;
+}
+.section-marker::before { content: '//'; color: var(--faint); }
+.section-marker::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+h2 {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+h2 span { color: var(--green); }
+
+h3 {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  margin-top: 20px;
+}
+
+p {
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+p strong { color: var(--text); font-weight: 600; }
+p em { color: var(--amber); font-style: normal; }
+
+/* ── PULL QUOTES ── */
+.pull-quote {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  border-left: 3px solid var(--green);
+  padding: 12px 20px;
+  margin: 24px 0;
+  line-height: 1.5;
+  background: var(--bg2);
+  border-radius: 0 6px 6px 0;
+}
+.pull-quote em { color: var(--green); font-style: normal; }
+
+/* ── HIGHLIGHT BOXES ── */
+.highlight-box {
+  background: var(--bg2);
+  border: 1px solid var(--border-hi);
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin: 20px 0;
+}
+.highlight-box.green { border-color: var(--green-dim); }
+.highlight-box.amber { border-color: var(--amber-dim); }
+.highlight-box.red { border-color: var(--red-lo); }
+.highlight-box-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.highlight-box.green .highlight-box-label { color: var(--green-dim); }
+.highlight-box.amber .highlight-box-label { color: var(--amber-dim); }
+.highlight-box.red .highlight-box-label { color: var(--red); }
+.highlight-box p { margin-bottom: 0; }
+
+/* ── FEATURE GRID ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.feature-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.feature-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.feature-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.feature-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── ENCOUNTER TYPES ── */
+.encounter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.encounter-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px 14px;
+}
+.encounter-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: var(--green-lo);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+}
+.encounter-body { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.encounter-body strong { color: var(--text); }
+
+/* ── SERVER TABLE ── */
+.server-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.server-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px 16px;
+  align-items: center;
+}
+.server-row.current { border-color: var(--green-dim); }
+.server-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.server-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--green-dim);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.server-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.server-nations { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-top: 2px; }
+
+/* ── SHOP TABLE ── */
+.shop-section { margin: 16px 0; }
+.tier-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 80px;
+  gap: 12px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.shop-tier {
+  display: grid;
+  grid-template-columns: 100px 1fr 80px;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+.shop-tier.mastercraft { border-color: var(--amber-dim); background: var(--amber-lo); }
+.tier-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.tier-name.common { color: var(--muted); }
+.tier-name.quality { color: #4a9a6a; }
+.tier-name.superb { color: var(--blue, #4488ff); }
+.tier-name.mastercraft { color: var(--amber); }
+.tier-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.tier-note { font-family: var(--mono); font-size: 9px; color: var(--faint); text-align: right; }
+.tier-note.mastercraft { color: var(--amber-dim); }
+
+.shop-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+}
+.shop-type {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  padding: 4px 10px;
+  border: 1px solid var(--border-hi);
+  border-radius: 2px;
+  color: var(--muted);
+}
+
+/* ── GUILD SECTION ── */
+.guild-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.guild-item {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px 14px;
+  align-items: flex-start;
+}
+.guild-icon { font-size: 18px; margin-top: 2px; }
+.guild-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.guild-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ── SURVEY SECTION ── */
+.survey-box {
+  background: var(--bg2);
+  border: 2px solid var(--green-dim);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+.survey-title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.survey-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.survey-phase {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.phase-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  background: var(--green-lo);
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  padding: 3px 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: .04em;
+}
+.phase-text { font-size: 13px; color: var(--muted); line-height: 1.55; }
+.phase-text strong { color: var(--text); }
+
+/* ── DIVIDER ── */
+.div { height: 1px; background: var(--border); margin: 40px 0; }
+
+/* ── FOOTER ── */
+.guide-footer {
+  text-align: center;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+}
+.guide-footer p {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: .08em;
+}
+
+/* ── PRINT ── */
+@media print {
+  body { background: #fff !important; color: #000 !important; padding: 0; max-width: 100%; }
+  .skip-nav { display: none !important; }
+  .cover { border-bottom: 2px solid #000; }
+  .cover-title { color: #000 !important; }
+  .cover-title span { color: #006633 !important; }
+  .cover-eyebrow, .cover-sub, .section-marker { color: #444 !important; }
+  .cover-tagline { color: #000 !important; }
+  .cover-tagline em { color: #006633 !important; }
+  .cover-note, p, .track-desc, .guild-desc, .server-desc, .encounter-body, .feature-desc, .survey-phase .phase-text { color: #333 !important; }
+  h2 { color: #000 !important; }
+  h2 span { color: #006633 !important; }
+  h3 { color: #000 !important; }
+  p strong, .feature-name, .guild-name, .server-name, .encounter-body strong { color: #000 !important; }
+  p em { color: #886600 !important; }
+  .pull-quote { background: #f5f5f5 !important; border-left: 3px solid #006633 !important; color: #000 !important; }
+  .pull-quote em { color: #006633 !important; }
+  .highlight-box, .how-to-read, .survey-box, .feature-card, .encounter-item, .server-row, .shop-tier, .guild-item { background: #f9f9f9 !important; border-color: #ccc !important; }
+  .survey-box { border-color: #006633 !important; }
+  .survey-title { color: #006633 !important; }
+  .track-pill.fast, .track-badge.fast, .phase-num, .encounter-tag, .server-tag, .skip-link.fast { background: #e8f5ee !important; border-color: #006633 !important; color: #006633 !important; }
+  .track-pill.full, .track-badge.full, .skip-link.full { background: #fff8e8 !important; border-color: #886600 !important; color: #886600 !important; }
+  .tier-name.common { color: #555 !important; }
+  .tier-name.quality { color: #2a7a4a !important; }
+  .tier-name.superb { color: #224488 !important; }
+  .tier-name.mastercraft { color: #886600 !important; }
+  .shop-tier.mastercraft { background: #fff8e8 !important; border-color: #886600 !important; }
+  .full-brief { border-left-color: #886600 !important; }
+  .section-marker::after { background: #ccc !important; }
+  .div { background: #ccc !important; }
+  .guide-footer p { color: #999 !important; }
+  .server-row.current { border-color: #006633 !important; }
+  @page { margin: 2cm; size: A4; }
+}
+</style>
+</head>
+<body>
+
+<!-- SKIP NAV -->
+<nav class="skip-nav">
+  <span class="skip-nav-label">Jump to:</span>
+  <a class="skip-link fast" href="#fast-track-start">⚡ Fast Track</a>
+  <a class="skip-link full" href="#full-brief-start">📖 Full Brief</a>
+</nav>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-eyebrow">Campaign Player Guide · American Server · Act 1</div>
+  <div class="cover-title">Legend<span>Reborn</span></div>
+  <div class="cover-sub">Callista Online · Contest TTRPG</div>
+  <div class="cover-tagline">
+    The game doesn't build your character.<br>
+    <em>It finds the one that was already there.</em>
+  </div>
+  <div class="cover-note">
+    Read this before Session Zero. It covers what Callista is, how the game works, and what to expect when you log in for the first time. A Fast Track version and a Full Brief are woven together — read as much or as little as you want.
+  </div>
+</div>
+
+<!-- HOW TO READ THIS -->
+<div class="how-to-read">
+  <h3>How to read this guide</h3>
+  <div class="track-row">
+    <span class="track-pill fast">Fast Track</span>
+    <span class="track-desc">The essentials. Read this, show up, you're ready. Takes about 3 minutes.</span>
+  </div>
+  <div class="track-row">
+    <span class="track-pill full">Full Brief</span>
+    <span class="track-desc">Everything the deep divers want — world detail, shop systems, guild breakdowns, the full mechanical picture. These sections are marked with an amber border and badge. Skip them if you want. Read them if you want to show up knowing more than everyone else.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1 — THE PITCH
+═══════════════════════════════════════ -->
+<div id="fast-track-start">
+<div class="section-marker">The pitch</div>
+<div class="track-badge fast">Fast Track</div>
+<h2>You just got early access to the <span>biggest MMO launch in history.</span></h2>
+
+<p>Legend Reborn dropped this week. No beta, no soft launch — full release, all servers live simultaneously, and the internet broke trying to talk about it. Full cross-platform play. A living world that actually reacts to what you do in it. NPCs that aren't just quest dispensers — they have jobs, opinions, grudges, and bad days. And a character creation system nobody has seen before.</p>
+
+<div class="pull-quote">
+  You didn't create a character. The game <em>read you</em>, and told you who you already were.
+</div>
+
+<p>Legend Reborn's character creation starts with a deep-dive questionnaire — your instincts, your history, what you're drawn to, even the stuff you'd never put on a normal character sheet. The game takes all of it and hands you back a character built to fit. A Role that already feels like second nature. An Archetype that reflects how you actually think. A flaw you probably recognize. A Special Move named after something only you would do.</p>
+
+<p>Now you're logging in. A few days late — life happens — which means the server's already moving without you. <strong>Guilds have formed. Rivalries have started. Somebody's already claimed bragging rights on the first boss.</strong> You're not walking into a blank world. You're walking into one that already has opinions about people like you.</p>
+
+<p style="color: var(--text); font-weight: 600;">Welcome to Callista. See you in Concordia.</p>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2 — THE WORLD
+═══════════════════════════════════════ -->
+<div class="section-marker">The world</div>
+<div class="track-badge fast">Fast Track</div>
+<h2>Callista is <span>enormous</span> — and it's all real.</h2>
+
+<p>Five major servers. Five continents and archipelagos. Each one drawing from a different real-world aesthetic — filtered through an anime lens and then cranked up. You're starting on the <em>American Server</em>, on the continent of Mercia: a diplomatic sprawl of warring provinces, a brutal desert nation called Felcho, and monster-thick frontier wilds called Brandia.</p>
+
+<p>The world has its own gods, its own history, and civilizations older than any player has any right to expect from a video game. The NPCs feel more alive than anything you've played before — reviewers keep comparing them to nothing else on the market, and a few days in, it's easy to see why.</p>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-icon">⚔️</div>
+    <div class="feature-name">Combat that matters</div>
+    <p class="feature-desc">Heavy encounters test your stats, your tactics, and your timing. Every fight has a right answer — and a way to find it even when outnumbered.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🗺️</div>
+    <div class="feature-name">A world that grows</div>
+    <p class="feature-desc">Every Chapter your server clears pushes the Server Level up. Better shops. Harder monsters. Louder magic. You earned it.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🧠</div>
+    <div class="feature-name">NPCs that know things</div>
+    <p class="feature-desc">Deep lore, real backstories, emotions, and information. Talk to people. The archivist in Concordia knows things the quest board doesn't.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🌐</div>
+    <div class="feature-name">Cross-server play</div>
+    <p class="feature-desc">Other servers exist. Other players exist. Rumors of ways to reach them are already circulating in the Lore Circles.</p>
+  </div>
+</div>
+
+<!-- FULL BRIEF: Servers -->
+<div class="full-brief" id="full-brief-start">
+  <div class="track-badge full">Full Brief — The Five Servers</div>
+  <p>Each server is its own continent with its own nations, culture, and signature content. You're starting on American — but the world is bigger than one server.</p>
+
+  <div class="server-grid">
+    <div class="server-row current">
+      <div>
+        <div class="server-name">American</div>
+        <div class="server-tag">▶ You are here</div>
+      </div>
+      <div>
+        <div class="server-desc">The continent of Mercia — diplomatic sprawl, desert conflict, monster-thick wilds. Three nations, twenty-five provinces, and a power vacuum forming in the south.</div>
+        <div class="server-nations">Mercia · Felcho · Brandia</div>
+      </div>
+    </div>
+    <div class="server-row">
+      <div><div class="server-name">European</div></div>
+      <div>
+        <div class="server-desc">The continent of Aldreth — fae-touched forests, the most prestigious magic academy on any server, and raiding fleets out of the frozen north.</div>
+        <div class="server-nations">Albryn · Corvane · Skarheim</div>
+      </div>
+    </div>
+    <div class="server-row">
+      <div><div class="server-name">Oriental Isles</div></div>
+      <div>
+        <div class="server-desc">The Kaien Reach archipelago — honor duels, sea-dragon reefs, and a hidden island that doesn't appear on any map sold to new players.</div>
+        <div class="server-nations">Kaien · Ryusen · Tsukikage</div>
+      </div>
+    </div>
+    <div class="server-row">
+      <div><div class="server-name">Asian</div></div>
+      <div>
+        <div class="server-desc">The continent of Shengtai — cultivation-empire politics, monsoon ruin-diving, and court intrigue that makes Mercia look straightforward.</div>
+        <div class="server-nations">Zhaol · Hanmun · Selat Kingdoms</div>
+      </div>
+    </div>
+    <div class="server-row">
+      <div><div class="server-name">Pan-African</div></div>
+      <div>
+        <div class="server-desc">The continent of Kessane — beast cavalry, tomb-delving, and canopy traversal across a world that rewards movement and instinct.</div>
+        <div class="server-nations">Umoja · Kharzuun · Vondrai</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3 — HOW TO PLAY
+═══════════════════════════════════════ -->
+<div class="section-marker">How to play</div>
+<div class="track-badge fast">Fast Track</div>
+<h2>The game runs on <span>Chapters</span> — and you're already behind.</h2>
+
+<p>Legend Reborn's launch content runs on <strong>Chapters</strong> — regional story beats that build toward a bigger confrontation, server by server. Clear them and you get real rewards: Artifacts, new Feats, gold, and a stake in something bigger. Every Chapter your server clears as a community pushes the whole server's <em>Server Level</em> up.</p>
+
+<p>When the Server Level rises, everything gets better. Shops stock gear they didn't carry last week. Monsters get tougher — and more worth fighting. Magic gets louder. Spells that were pushing your limits get safer to cast. It's not abstract number-go-up. It's a world that visibly grows because you and everyone else earned it.</p>
+
+<!-- FULL BRIEF: Encounter Types -->
+<div class="full-brief">
+  <div class="track-badge full">Full Brief — Combat & Encounter Modes</div>
+  <p>Legend Reborn runs on the Contest system — a fast, decisive combat engine where two sides roll dice and the higher number wins. No hit points that disappear one at a time. No death spirals. Fights are sharp, outcomes matter, and every character has something specific they're built to do.</p>
+
+  <div class="encounter-list">
+    <div class="encounter-item">
+      <span class="encounter-tag">Duel</span>
+      <div class="encounter-body"><strong>1v1 — alternating turns, full intensity.</strong> The purest test of a character build. You go, they go, one of you stops first. Great for settling disputes, boss phases, and the moments that define rivalries.</div>
+    </div>
+    <div class="encounter-item">
+      <span class="encounter-tag">Skirmish</span>
+      <div class="encounter-body"><strong>Party vs party — side-based, tactical.</strong> Your bread and butter. Your party acts, their side acts. Positioning matters, covering your allies matters, and the right ability at the right moment can swing everything.</div>
+    </div>
+    <div class="encounter-item">
+      <span class="encounter-tag">Hunt</span>
+      <div class="encounter-body"><strong>Chase and pursuit — instinct over stats.</strong> Rock-paper-scissors logic at its core: pursue, evade, or ambush. Speed builds and tracker archetypes shine here. The monster either gets away or it doesn't.</div>
+    </div>
+    <div class="encounter-item">
+      <span class="encounter-tag">Battle</span>
+      <div class="encounter-body"><strong>Army vs army — macro and micro.</strong> The biggest scale in the game. You control units at the strategic level and individual characters at the tactical level simultaneously. Guild conquests, province wars, and server-defining confrontations live here.</div>
+    </div>
+  </div>
+
+  <p>Every character has a <strong>Role</strong> (what they are in a fight), an <strong>Archetype</strong> (how they do it), <strong>Stats</strong> (which dice they roll), <strong>Feats</strong> (edges they've earned), a <strong>Flaw</strong> (what makes them human), and a <strong>Special Move</strong> — the thing they do when everything is on the line and holding back is no longer an option.</p>
+
+  <p><strong>Tenacity</strong> is the resource that makes this system feel alive. You earn it on failure. You spend it to tip rolls in your favor. The longer a fight goes badly, the more dangerous you become. The party that's been losing all night is the party you do not want to corner.</p>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 4 — YOUR PARTY
+═══════════════════════════════════════ -->
+<div class="section-marker">Your party</div>
+<div class="track-badge fast">Fast Track</div>
+<h2>You're not starting <span>alone</span>.</h2>
+
+<p>You're logging in as a group. That's unusual — most Reborn arrive solo, find their footing, maybe fall in with other players over time. Your party is already formed before you've taken your first step in Concordia. That's an advantage. Use it.</p>
+
+<p>Your characters don't know each other yet — but they're arriving at the same time, in the same city, at the same Server Level. How they meet, why they stay together, and what they're willing to do for each other is the first story you'll tell.</p>
+
+<div class="highlight-box green">
+  <div class="highlight-box-label">Starting point</div>
+  <p><strong>Concordia, Mercia.</strong> The American server's hub city. Neutral ground — every faction, every guild, every rumor passes through here eventually. You'll get your bearings here before the world starts pulling you in different directions.</p>
+</div>
+
+<!-- FULL BRIEF: Guilds -->
+<div class="full-brief">
+  <div class="track-badge full">Full Brief — Guilds</div>
+  <p>Guilds are the backbone of how players engage with Callista. You won't have access to guilds on day one — you'll need to find your footing first. But they'll be visible from the moment you arrive in Concordia, and knowing what's out there helps you figure out what your character wants.</p>
+
+  <p>You don't have to join one. Plenty of Reborn go it alone, at least at first. But knowing which style pulls you is a good way to understand what your character wants out of this world.</p>
+
+  <div class="guild-list">
+    <div class="guild-item">
+      <div class="guild-icon">📋</div>
+      <div>
+        <div class="guild-name">The Concord Compact</div>
+        <div class="guild-desc">Story Vanguard. Here for the big narrative beats, chapter by chapter, ideally first. Commander Priya Osei runs it out of Concordia — the officially recognized Reborn guild of Mercia.</div>
+      </div>
+    </div>
+    <div class="guild-item">
+      <div class="guild-icon">⚔️</div>
+      <div>
+        <div class="guild-name">The Province Line Militia</div>
+        <div class="guild-desc">Warband. Territory, rivalry, winning fights against other players more than any boss. Mobile, currently operating out of Ashford. If PvP is the point, this is your people.</div>
+      </div>
+    </div>
+    <div class="guild-item">
+      <div class="guild-icon">🏆</div>
+      <div>
+        <div class="guild-name">The Trophy Wardens</div>
+        <div class="guild-desc">Raid Syndicate. Dungeons, hunts, boss mechanics, the hardest content available. Based out of Stagfall in Brandia — they're already in the wilds, already hunting.</div>
+      </div>
+    </div>
+    <div class="guild-item">
+      <div class="guild-icon">🔍</div>
+      <div>
+        <div class="guild-name">The Lore Circle</div>
+        <div class="guild-desc">Mysteries, old texts, the weird stuff nobody's explained yet. Every server has one — ask your GM what the American version looks like. If you want to understand this world rather than just level through it, start here.</div>
+      </div>
+    </div>
+    <div class="guild-item">
+      <div class="guild-icon">🎲</div>
+      <div>
+        <div class="guild-name">We Definitely Read The Patch Notes</div>
+        <div class="guild-desc">Chaos/Social. Fun, friends, harmless (or not-so-harmless) mayhem. No headquarters — wherever the last bar fight happened. Commander "Chaos" Mo Delgado has not read the patch notes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 5 — ECONOMY & SHOPS
+═══════════════════════════════════════ -->
+<div class="section-marker">Economy</div>
+<div class="track-badge fast">Fast Track</div>
+<h2>Gear up. <span>The market is already moving.</span></h2>
+
+<p>Callista has a full player-driven economy — shops, black markets, player trading, and crafted items that actually matter. What's available depends on where you are and what your server has earned. Higher Server Level means better stock. Better stock means better fights. Better fights mean more gold.</p>
+
+<p>There are armories, blade smiths, fletchers, alchemists, stables, and stranger things in every major city. Find the right vendor for your build and check back as the server grows.</p>
+
+<!-- FULL BRIEF: Shop Tiers -->
+<div class="full-brief">
+  <div class="track-badge full">Full Brief — Shop Grades & Store Types</div>
+  <p>Every store type exists at multiple quality grades. The grade determines what's on the shelves, how powerful it is, and how rare it is to find. You'll start with access to Common shops in Concordia — the higher tiers unlock as the server levels and new cities open up.</p>
+
+  <div class="shop-section">
+    <div class="tier-header">
+      <span>Grade</span>
+      <span>What's available</span>
+      <span>Access</span>
+    </div>
+    <div class="shop-tier">
+      <span class="tier-name common">Common</span>
+      <span class="tier-desc">Standard gear, basic components, everyday supplies. Functional and available everywhere. What every new Reborn starts with.</span>
+      <span class="tier-note">All cities</span>
+    </div>
+    <div class="shop-tier">
+      <span class="tier-name quality">Quality</span>
+      <span class="tier-desc">Noticeably better materials, tighter craftsmanship. You'll feel the difference in a fight. Found in larger cities and trade hubs.</span>
+      <span class="tier-note">Major cities</span>
+    </div>
+    <div class="shop-tier">
+      <span class="tier-name superb">Superb</span>
+      <span class="tier-desc">Named materials, rare components, items with properties that don't show up in Common or Quality stock. Worth traveling for.</span>
+      <span class="tier-note">Server Level 2+</span>
+    </div>
+    <div class="shop-tier mastercraft">
+      <span class="tier-name mastercraft">Mastercraft</span>
+      <span class="tier-desc">The best in the world. One Mastercraft version of each store type exists per server — find it, and you've found something most players never will. These items have names.</span>
+      <span class="tier-note mastercraft">One per server</span>
+    </div>
+  </div>
+
+  <p>Store types you'll encounter across Callista:</p>
+  <div class="shop-types">
+    <span class="shop-type">⚔ Blade Smith</span>
+    <span class="shop-type">🏹 Fletcher</span>
+    <span class="shop-type">🛡 Armourer</span>
+    <span class="shop-type">⚗ Alchemist</span>
+    <span class="shop-type">🐎 Stables</span>
+    <span class="shop-type">📜 Scribe</span>
+    <span class="shop-type">💎 Jeweller</span>
+    <span class="shop-type">🌿 Herbalist</span>
+    <span class="shop-type">🔧 Tinkerer</span>
+    <span class="shop-type">🎭 Trader</span>
+    <span class="shop-type">🌑 Black Market</span>
+    <span class="shop-type">🏛 Antiquities</span>
+  </div>
+
+  <div class="highlight-box amber">
+    <div class="highlight-box-label">Note on the Black Market</div>
+    <p>It exists. Every city has one, even if it doesn't advertise. What's available there operates outside the grade system — you'll find things you can't get anywhere else, at prices that aren't always gold. Ask around. Don't ask openly.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 6 — THE SURVEY
+═══════════════════════════════════════ -->
+<div class="section-marker">Before you log in</div>
+
+<div class="survey-box">
+  <div class="survey-title">The Character Scan</div>
+  <div class="track-badge fast" style="margin-bottom:12px">Fast Track + Full Brief — read this section regardless</div>
+
+  <p>Before Session Zero, you'll receive a link. When you open it, Legend Reborn's onboarding AI will conduct your character scan — the same system the game uses for every new Reborn. <strong>Answer honestly. The game is paying attention.</strong></p>
+
+  <p>This is not a quiz with right answers. It's a conversation. The AI adapts to what you say — every question is built from your previous answer. The more honest you are, the more accurate your character will be. A character built from who you actually are is more interesting than a character built from who you think you should be.</p>
+
+  <div class="highlight-box red" style="margin:16px 0">
+    <div class="highlight-box-label">Important</div>
+    <p>This survey generates your actual character sheet. Your Role, Archetype, Stats, Feats, Flaw, Equipment, and Special Move all come from this conversation. Your GM receives a private brief based on your answers. Take it seriously — but don't overthink it. The best results come from gut responses, not optimized ones.</p>
+  </div>
+
+  <p style="color:var(--text);font-weight:600;margin-bottom:12px">What the scan covers:</p>
+
+  <div class="survey-phases">
+    <div class="survey-phase">
+      <span class="phase-num">Phase 1</span>
+      <span class="phase-text"><strong>Identity Scan.</strong> Who are you in real life? Physical presence, instincts under pressure, what you're genuinely good at. The game is reading your biometrics — answer as yourself, not as a character concept.</span>
+    </div>
+    <div class="survey-phase">
+      <span class="phase-num">Phase 2</span>
+      <span class="phase-text"><strong>Combat & Instinct.</strong> What do you default to in games like Skyrim or Elden Ring? Do you want to absorb punishment or deal it? Surgical precision or hit everything in the room? This determines your Role and weapon loadout.</span>
+    </div>
+    <div class="survey-phase">
+      <span class="phase-num">Phase 3</span>
+      <span class="phase-text"><strong>Reference Pull.</strong> What characters from any medium — anime, games, books, film — resonate with you and why? The game cross-references your cultural data to triangulate your Archetype. Push past surface answers.</span>
+    </div>
+    <div class="survey-phase">
+      <span class="phase-num">Phase 4</span>
+      <span class="phase-text"><strong>The Wound.</strong> The game needs to understand your vulnerabilities to build your resistances. This reveals your Flaw — not by asking for it directly, but by listening for the pattern. Be honest here.</span>
+    </div>
+    <div class="survey-phase">
+      <span class="phase-num">Phase 5</span>
+      <span class="phase-text"><strong>Ability Workshop.</strong> Your three Abilities and Special Move get proposed and workshopped. The Special Move name and description are yours to shape — this is the one thing you build together. Name it something worth shouting.</span>
+    </div>
+  </div>
+
+  <p style="margin-top:16px">When the scan is complete, your character sheet generates automatically and your GM receives a private brief. You'll see everything except the GM brief — that's theirs. Read your herald text carefully. It knows something about you.</p>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 7 — WHAT TO EXPECT
+═══════════════════════════════════════ -->
+<div class="section-marker">What to expect</div>
+<div class="track-badge fast">Fast Track</div>
+<h2>This is a <span>launch-week MMO</span> campaign.</h2>
+
+<p>Fresh world. Fresh stakes. Real excitement in the air. A Story Line that's genuinely fun to chase — big bosses, good loot, real character growth. <strong>Play into that.</strong> Get excited about your Chapter clears. Pick a direction and lean into it. Rival other players if that's your thing, or don't, and just enjoy the ride.</p>
+
+<p>Your backstory should fit wherever you're starting: a Mercian provincial upbringing, a hardened Felcho survivor, a Brandia-born monster hunter's apprentice, or an outsider who just arrived and hasn't picked a side yet. All valid. All already have hooks waiting.</p>
+
+<div class="highlight-box green">
+  <div class="highlight-box-label">One thing worth knowing</div>
+  <p>The world reacts to what you do. NPCs remember. Factions shift. The border dispute in Ashford Province is already pulling in other players — and the outcome of Chapter 1 will affect what Chapter 2 looks like for your entire server. Your decisions matter beyond your own story.</p>
+</div>
+
+<p>Everything else — you'll find out as you go.</p>
+
+<div class="pull-quote" style="margin-top:32px">
+  It should feel less like a build you optimized and more like <em>a version of yourself the game recognized before you did.</em>
+</div>
+
+<!-- FOOTER -->
+<div class="guide-footer">
+  <p>LEGEND REBORN · CALLISTA ONLINE · AMERICAN SERVER · ACT 1 · SERVER LEVEL 1</p>
+  <p style="margin-top:6px">CONTEST TTRPG · Session Zero Player Guide · See you in Concordia.</p>
+</div>
+
+</body>
+</html>
