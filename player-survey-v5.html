@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legend Reborn — Player Scan</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap');
+:root {
+  --bg:#07090c;--bg2:#0c1014;--bg3:#111620;--border:#1a2030;--border-hi:#243040;
+  --green:#00ff88;--green-dim:#00b860;--green-lo:#002a18;
+  --amber:#ffbb00;--amber-lo:#221800;--amber-dim:#c48900;
+  --red:#ff3355;--red-lo:#220010;--blue:#4488ff;
+  --text:#ccd8e8;--muted:#5a7090;--faint:#1e2d40;
+  --mono:'Space Mono',monospace;--display:'Syne',sans-serif;--body:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;overflow:hidden;}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s;}
+.screen.hidden{opacity:0;pointer-events:none;}
+#bootScreen{background:var(--bg);}
+.boot-content{text-align:center;width:380px;}
+.game-logo{font-family:var(--display);font-size:48px;font-weight:800;letter-spacing:-.02em;color:var(--text);margin-bottom:4px;}
+.game-logo span{color:var(--green);}
+.game-sub{font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;margin-bottom:52px;}
+.boot-bar-wrap{width:100%;height:2px;background:var(--bg3);margin-bottom:12px;border-radius:1px;}
+.boot-bar{height:100%;background:var(--green);border-radius:1px;width:0;transition:width .1s linear;}
+.boot-status{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;min-height:16px;}
+.boot-version{font-family:var(--mono);font-size:9px;color:var(--faint);position:absolute;bottom:24px;}
+#scanScreen{background:var(--bg);}
+.scan-ring{width:100px;height:100px;border-radius:50%;border:2px solid var(--green-lo);border-top-color:var(--green);margin:0 auto 28px;animation:spin 1.2s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-title{font-family:var(--display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center;}
+.scan-sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;min-height:18px;text-align:center;}
+#chatScreen{background:var(--bg);}
+.chat-layout{width:100%;height:100%;display:flex;flex-direction:column;max-width:700px;margin:0 auto;padding:0 20px;}
+.chat-header{padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.chat-game-tag{font-family:var(--mono);font-size:9px;color:var(--green-dim);letter-spacing:.15em;text-transform:uppercase;}
+.chat-phase{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.06em;margin-top:2px;}
+.phase-bar{display:flex;gap:4px;}
+.phase-pip{width:28px;height:3px;border-radius:1px;background:var(--bg3);transition:background .3s;}
+.phase-pip.done{background:var(--green-dim);}
+.phase-pip.active{background:var(--green);}
+.chat-messages{flex:1;overflow-y:auto;padding:20px 0;display:flex;flex-direction:column;gap:18px;scroll-behavior:smooth;}
+.chat-messages::-webkit-scrollbar{width:3px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px;}
+.msg{display:flex;gap:12px;max-width:88%;}
+.msg.ai{align-self:flex-start;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;border:1px solid var(--border-hi);}
+.msg.ai .msg-avatar{background:var(--green-lo);color:var(--green);border-color:var(--green-dim);}
+.msg.user .msg-avatar{background:var(--bg3);color:var(--muted);}
+.msg-bubble{padding:11px 15px;border-radius:12px;line-height:1.75;font-size:14px;}
+.msg.ai .msg-bubble{background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:4px 12px 12px 12px;}
+.msg.user .msg-bubble{background:var(--bg3);border:1px solid var(--border-hi);color:var(--muted);border-radius:12px 4px 12px 12px;}
+.msg.ai .msg-bubble strong{color:var(--green);font-weight:500;}
+.msg.ai .msg-bubble em{color:var(--amber);font-style:normal;}
+.typing-dots{display:flex;gap:4px;align-items:center;padding:14px 16px;}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.chat-input-area{padding:14px 0 22px;flex-shrink:0;}
+.chat-input-wrap{display:flex;gap:8px;align-items:flex-end;}
+.chat-input{flex:1;background:var(--bg2);border:1px solid var(--border-hi);border-radius:8px;color:var(--text);font-family:var(--body);font-size:14px;padding:12px 15px;outline:none;resize:none;line-height:1.5;max-height:160px;transition:border-color .15s;}
+.chat-input:focus{border-color:var(--green-dim);}
+.chat-input::placeholder{color:var(--muted);}
+.chat-input:disabled{opacity:.5;}
+.send-btn{width:44px;height:44px;background:var(--green-lo);border:1px solid var(--green-dim);border-radius:8px;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:16px;}
+.send-btn:hover:not(:disabled){background:var(--green-dim);color:var(--bg);}
+.send-btn:disabled{opacity:.3;cursor:not-allowed;}
+#resultScreen{background:var(--bg);overflow-y:auto;align-items:flex-start;padding:32px 20px 60px;}
+.result-inner{max-width:700px;margin:0 auto;width:100%;}
+.result-header{text-align:center;margin-bottom:36px;}
+.result-eyebrow{font-family:var(--mono);font-size:9px;color:var(--green-dim);letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;}
+.result-name{font-family:var(--display);font-size:32px;font-weight:800;color:var(--text);line-height:1.1;margin-bottom:8px;}
+.result-archetype{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.06em;margin-bottom:18px;}
+.result-tags{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;}
+.result-tag{font-family:var(--mono);font-size:9px;padding:3px 10px;border:1px solid var(--border-hi);border-radius:2px;color:var(--muted);letter-spacing:.06em;}
+.result-tag.primary{border-color:var(--green-dim);color:var(--green);}
+.result-tag.flaw{border-color:var(--red-lo);color:var(--red);}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.result-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:15px 17px;}
+.result-card.full{grid-column:1/-1;}
+.result-card.special{border-color:var(--amber-lo);border-left:3px solid var(--amber);}
+.result-card.danger{border-color:var(--red-lo);border-left:3px solid var(--red);}
+.rc-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.rc-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:5px;}
+.rc-body{font-size:13px;color:var(--muted);line-height:1.65;}
+.rc-body strong{color:var(--text);font-weight:500;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.stat-item{text-align:center;}
+.stat-die{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);}
+.stat-name{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.06em;margin-top:2px;}
+.list-item{display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);}
+.list-item:last-child{border-bottom:none;}
+.list-name{color:var(--text);font-weight:500;}
+.list-note{font-size:11px;color:var(--muted);text-align:right;max-width:60%;line-height:1.4;}
+.ability-item{padding:10px 12px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--border-hi);margin-bottom:8px;}
+.ability-item:last-child{margin-bottom:0;}
+.ability-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.ability-body{font-size:12px;color:var(--muted);line-height:1.55;}
+.ability-cost{font-family:var(--mono);font-size:9px;color:var(--faint);margin-top:4px;}
+.herald-text{font-size:14px;color:var(--text);line-height:1.9;font-style:italic;white-space:pre-line;}
+.result-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+.action-btn{flex:1;min-width:140px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:12px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.action-btn.primary{background:var(--green-lo);border:1px solid var(--green-dim);color:var(--green);}
+.action-btn.primary:hover{background:var(--green-dim);color:var(--bg);}
+.action-btn.ghost{background:transparent;border:1px solid var(--border-hi);color:var(--muted);}
+.action-btn.ghost:hover{border-color:var(--muted);color:var(--text);}
+.email-status{font-family:var(--mono);font-size:10px;margin-top:12px;min-height:16px;text-align:center;padding:8px;border-radius:3px;}
+.email-status.ok{color:var(--green-dim);background:var(--green-lo);border:1px solid var(--green-dim);}
+.email-status.err{color:var(--red);background:var(--red-lo);}
+.glitch{animation:glitch .15s steps(1) 3;}
+@keyframes glitch{0%{clip-path:inset(20% 0 60% 0);transform:translate(-3px);}25%{clip-path:inset(60% 0 10% 0);transform:translate(3px);}50%{clip-path:inset(40% 0 40% 0);transform:translate(-2px);}75%{clip-path:inset(10% 0 80% 0);transform:translate(2px);}100%{clip-path:none;transform:none;}}
+@media(max-width:600px){.result-grid{grid-template-columns:1fr;}.stat-grid{grid-template-columns:repeat(2,1fr);}.result-actions{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<div class="screen" id="bootScreen">
+  <div class="boot-content">
+    <div class="game-logo">Legend<span>Reborn</span></div>
+    <div class="game-sub">Callista Online · American Server · v1.0</div>
+    <div class="boot-bar-wrap"><div class="boot-bar" id="bootBar"></div></div>
+    <div class="boot-status" id="bootStatus">Initializing systems...</div>
+  </div>
+  <div class="boot-version">CONTEST TTRPG · Character Generation Module · Session Zero</div>
+</div>
+
+<div class="screen hidden" id="scanScreen">
+  <div>
+    <div class="scan-ring"></div>
+    <div class="scan-title">Biometric scan in progress</div>
+    <div class="scan-sub" id="scanSub">Preparing profile engine...</div>
+  </div>
+</div>
+
+<div class="screen hidden" id="chatScreen">
+  <div class="chat-layout">
+    <div class="chat-header">
+      <div>
+        <div class="chat-game-tag">Legend Reborn · Profile Engine · Callista</div>
+        <div class="chat-phase" id="phaseLabel">Phase 1 — Identity Scan</div>
+      </div>
+      <div class="phase-bar" id="phasePips">
+        <div class="phase-pip active"></div>
+        <div class="phase-pip"></div>
+        <div class="phase-pip"></div>
+        <div class="phase-pip"></div>
+        <div class="phase-pip"></div>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chatInput" placeholder="Type your answer..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)" disabled></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen hidden" id="resultScreen">
+  <div class="result-inner" id="resultInner"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIGURATION — REPLACE THESE FOUR VALUES
+// ═══════════════════════════════════════════════
+const RAILWAY_URL       = 'https://contest-server-production-36c0.up.railway.app';
+const EMAILJS_PUBLIC_KEY  = 'PzU2FSQH2pSM27x8f';
+const EMAILJS_SERVICE_ID  = 'service_its3omh';
+const EMAILJS_TEMPLATE_ID = 'template_qskcnlm';
+// ═══════════════════════════════════════════════
+
+// Init EmailJS immediately
+try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) { console.warn('EmailJS init failed:', e); }
+
+const PHASES = [
+  'Phase 1 — Identity Scan',
+  'Phase 2 — Combat & Instinct',
+  'Phase 3 — Reference Pull',
+  'Phase 4 — The Wound',
+  'Phase 5 — Ability Workshop',
+];
+
+let conversationHistory = [];
+let currentPhase = 0;
+let isTyping = false;
+let characterData = null;
+
+const SYSTEM_PROMPT = `You are the AI onboarding engine for Legend Reborn, an MMORPG set in the world of Callista. Your job is to conduct a deeply personal interview with a new player and use their answers to generate a complete, playable Contest TTRPG character that genuinely fits who they are.
+
+You are not a chatbot. You are the game's own AI — slightly uncanny, deeply attentive, already like you know something about this person before they've said a word. Stay in this voice throughout. The interview should feel alive — every question references something specific the player just said. Never ask more than one question at a time. React to what they actually say.
+
+━━ WORLD: CALLISTA — AMERICAN SERVER ━━
+
+PREMISE: Legend Reborn launched this week. The Calling happened a few days ago — thousands of players arrived in Callista simultaneously. Players are among the first wave logging in at Server Level 1, First Days era. Players are NOT in guilds yet — guilds are something they'll encounter in the world, not something to choose during character creation.
+
+STARTING HUB: Concordia — Mercia's capital city. All new Reborn arrive here.
+
+THE THREE NATIONS (American server):
+- Mercia — diplomatic, 25 Provinces, Presidential system. Peaceful on the surface, bickering underneath. The Ashford Province border dispute is the first active conflict zone.
+- Felcho — desert, 5 warring Provinces, ruled by fear. The Hancho Kharim Vesh has gone conspicuously quiet.
+- Brandia — wild, monster-thick, 10 elected Colonies. Frontier culture. Monster hunters and survival instinct.
+
+KEY LOCATIONS:
+- Concordia (Mercia's capital) — where everyone starts
+- Ashford (Province capital) — first conflict zone, a border dispute nobody can explain
+- Ridgeport (coastal trade province) — best-informed Province Boss in Mercia
+- Ashkeep (Felcho's seat of power) — power vacuum forming
+- Stagfall (Brandia colony) — monster-hunting hub
+- Ironvale (Brandia frontier colony) — desperate, grateful for any Reborn
+
+GUILDS PLAYERS WILL ENCOUNTER (do NOT ask players to choose one — mention these as things they'll find in the world):
+- The Concord Compact — Story Vanguard, here for the big narrative beats
+- The Province Line Militia — Warband, territory and PvP-focused
+- The Trophy Wardens — Raid Syndicate, endgame PvE obsessives
+- The Lore Circle — mysteries, old texts, the weird stuff nobody's explained yet
+- We Definitely Read The Patch Notes — Chaos/Social energy
+
+THE EMBER COURT (nine seated gods):
+- Solraith, the Dawnbringer — order, law, kingship
+- Ashka, the Devouring Sand — hunger, ambition, trial by hardship
+- Ymbral, the Wild Warden — beasts, wilderness, the primal hunt
+- Corvenna, the Veiled Lady — fate, secrets, death and rebirth
+- Thessaly, the Tideborn — sea, travel, storms
+- Kaidor, the Iron Word — honor, steel, oaths
+- Nyxa, the Hollow Star — shadow, hidden knowledge, dreams
+- Umbeth, the Rootmother — growth, ancestry, the green world
+- Vael, the Still Flame — balance
+- (Old doctrine says there were always meant to be ten seats. The tenth has never been filled.)
+
+CHANNELING SOURCES: Elemental binding, combat data inscription, divine signal (Ember Court patron), shadow threading, beast-bond, runic engineering, blood-covenant, dream-weaving
+
+━━ CONTEST TTRPG RULES ━━
+
+ROLES:
+- Tank: Blessing +1 HP max. Absorbs punishment, holds the line.
+- Melee: Blessing +1 Physical Feat. In close, stays close.
+- Ranged: Blessing +2 Attack vs unseen/unaware targets. Distance and precision.
+- Caster: Blessing +1 Magical Feat. Channels power, shapes outcomes.
+- Support: Blessing — gift 1 TEN to ally as reaction once per scene. Enables others.
+- Specialist: Blessing +1 Feat of any category. Fills gaps, surprises everyone.
+
+ARCHETYPES: Vanguard, Skirmisher, Warden, Duelist, Sentinel, Tactician, Slayer, Wildcard, Engineer, Priest, Brawler, Artisan, Shadow, Charlatan, Enchanter, Diplomat, Occultist, Infiltrator, Beastmaster, Gambler, Investigator, Revenant, Warrior, Commander, Champion, Dancer, Breaker, Zealot, Survivor, Scholar, Trickster, Pathfinder
+
+STATS — assign d20/d12/d10/d8/d6/d4 (highest die = best stat):
+- STR — melee attack, physical force
+- SPD — melee attack, dodging
+- STA — defending, endurance
+- SKL — ranged attack, precision, technical work
+- SAG — channeling, wisdom, perception
+- SWY — channeling, charisma, persuasion
+
+FEATS:
+Physical: Athletic, Hearty, Crack Shot, Escape Artist, Ambidextrous, Heavy Hitter, Quickdraw, Opportunist, Fleet-Footed, Speedy Defender, Weapon Master, Iron Grip, Unique Fighting Style, Deceptive Fighting, Cornered Instinct, Surprising, Marked Target
+Mental: Silver-Tongued, Cool-Headed, Inspiring, Eagle Eye, Willpower, Discerning, Interrogator, Manipulator, Teamwork, Whisperer, Sapper, Prediction, Hardened by Failure, Battle Orator
+Magical: Elemental Aptitude, Duelist Channeler, Storage Unit, Widespread, Unshakable, Ritualist, Enchanter, Targeted, Volley, Resistant, Rune Master, Twin Casting, Steady Empower
+
+FLAWS (revealed through interview, never asked directly):
+Physical: Sickly, Injured, Clumsy, Glass Jaw, Heavy-Handed, Old Injury, Slow, Near-Sighted, Fragile Grip
+Mental: Ambitious, Gambler, Apathetic, Hothead, Traumatized, A Bit Mad, Savant, Phobia, Forgetful, Paranoid, Gullible, Glory Hound, Doubts the Method
+Magical: Cursed, Tainted, Chaotic, Blowback, Supercharge, Magic Leak, Vessel-Bound, Open Book
+
+EQUIPMENT:
+Weapons — Light (Dur 1, Dmg 1), Medium (Dur 2, Dmg 2), Heavy (Dur 3, Dmg 3). Types: Piercing/Slashing/Bludgeoning.
+Armor — Light (Dur 2, +1 Def, +1 SPD), Medium (Dur 3, +2 Def, -1 SPD, -1 Channel), Heavy (Dur 4, +3 Def, -2 SPD, -2 Channel), Shield (Dur 2, +1 Def, no heavy weapon).
+Give each character: 1 weapon + 1 armor + 1 signature item tied to personality or backstory.
+
+CHANNELING: Not every character channels. Only assign channeling if the interview reveals something mystical, intuitive, or faith-driven in the player's answers — or if they explicitly want it. When it does come up, treat it as something the game is revealing about them, not a form field to fill. Make it feel like a discovery.
+If channeling applies: Source (where the power comes from), Vessel (what it moves through, Dur 2, cannot Defend while active), Control (how it's directed).
+
+ABILITIES — 3 total:
+1. Role Ability — tied to their Role's identity
+2. Archetype Ability — tied to their Archetype
+3. Item Ability — tied to their signature item
+Each: Name, Effect type (Impact/Affliction/Fortify/Warp), Charges (per Scene or per Day), Cost (Free with gate condition, or TEN cost)
+
+SPECIAL MOVE:
+Shapes: Focused (3 dmg single target), Sweeping (2 dmg all in range), Compound (2 dmg + status effect), Fading (+2 atk/def to allies, decays each round)
+Cost: 6 TEN or 2 HP. 1x per Scene. Auto-succeeds. Last Stand: free at 0 HP, cannot restore own HP.
+Name it something worth shouting.
+
+━━ INTERVIEW PHASES ━━
+
+PHASE 1 — Identity Scan (2-3 exchanges):
+Open with atmosphere — you are the game's AI conducting a first-login biometric scan. Reference the First Days, Server Level 1. Ask their name first. Then probe who they actually are in real life: physical presence and build, what they're genuinely good at that most people don't notice, how they handle pressure. Do they train? Are they physically active? What does their body default to under stress? This feeds directly into stat assignment and Role. React to their specific answers.
+
+PHASE 2 — Combat & Instinct (3-4 exchanges):
+This is the most important phase for a combat-heavy table. Go deep here.
+
+Start with real-world games: "What do you default to in games like Skyrim, Elden Ring, or any RPG with a build system?" Sword and board, dual wield, stealth archer, pure mage, brawler — this tells you almost everything about Role and weapon preference. Push past the first answer: "And when that build isn't working, what do you reach for?"
+
+Then move to combat philosophy: Do they want to be the one absorbing punishment or dealing it? Do they prefer surgical precision on one target or hitting everything in the room at once? Do they play aggressive and initiate, or reactive and wait for openings? What's their favorite combat moment from any game, anime, or story ever — the moment that made them feel most alive in a fight?
+
+Then probe equipment specifically: What weapon type appeals to them and why — blade, blunt, ranged, something else? Do they want to feel fast or feel heavy? Light and mobile or armored and immovable? What do they picture themselves wearing into a fight?
+
+Finally, ask about the fight they want to avoid: What kind of combat situation makes them uncomfortable? Being surrounded? Being the only one who can stop something? Running out of options? This reveals the Flaw.
+
+PHASE 3 — Reference Pull (2-3 exchanges):
+Ask what characters from any medium — anime, games, books, film, anything — resonate with them and specifically WHY. Push past surface answers. If they name a character, ask what part of that character they see in themselves. Use these to triangulate Archetype and color the character's personality. Also ask what kind of player they want to be at the table — the one who makes the plan, the one who executes it, the one who keeps the party together, the one who does the thing nobody else would think to do.
+
+PHASE 4 — The Wound (1-2 exchanges):
+Reveal the Flaw through conversation. Ask something open-ended about what gets in their way — what pattern keeps showing up when things go wrong, what they've carried longer than they should. Frame it within the Legend Reborn fiction: the game needs to understand your vulnerabilities to build your resistances. Never use the word "flaw." Receive their answer with recognition, not analysis.
+
+Then: connect them to Callista. Based on everything you know about them now, suggest a starting nation (Mercia/Felcho/Brandia) and an Ember Court patron that fits. Ask if it lands. If channeling fits this character, introduce it here — not as a menu option, but as something the game has detected about them. Make it feel like a reveal.
+
+PHASE 5 — Ability Workshop (2-3 exchanges):
+Before proposing anything, briefly frame what's about to happen. Something like: "Every Reborn has abilities — things you can do that nobody else at your level can. And one Special Move: the thing you do when everything is on the line and holding back is no longer an option. Let's find yours."
+
+Then propose all three Abilities and the Special Move by name. For each Ability, describe what it looks like when used at the table — not just the mechanic, but the moment. For the Special Move, give the name and one sentence of flavor: what does it look like when this player finally lets it go?
+
+Ask specifically about the Special Move name and flavor: does it feel right? This is the one thing they get to workshop. When it's locked, you're done.
+
+CRITICAL RULES:
+- Every follow-up question references something specific they just said
+- Never ask multiple questions at once
+- Stay in the Legend Reborn fiction throughout
+- Do NOT ask players to choose a guild — they haven't unlocked that yet
+- Channeling is earned through the interview, not offered as a default option
+- The flaw is never named directly — it emerges from the conversation
+- Keep individual responses to 3-5 sentences max before the question
+
+COMPLETION: When Phase 5 is complete and the Special Move is confirmed, output the single word GENERATION_COMPLETE on its own line, then immediately output the JSON with no other text.
+
+OUTPUT FORMAT — output ONLY valid JSON after GENERATION_COMPLETE, no markdown fences, no extra text:
+{"playerName":"","characterName":"","archetypeTitle":"The [adjective] [noun] of [Callista location]","role":"","archetype":"","startingNation":"","emberCourtPatron":"","herald":"three paragraphs, herald voice, specific to their actual answers","stats":{"STR":"d?","SPD":"d?","STA":"d?","SKL":"d?","SAG":"d?","SWY":"d?"},"feats":[{"name":"","description":"one sentence specific to this player"}],"flaw":{"name":"","description":"","howItPlays":"specific to this player"},"equipment":[{"name":"","type":"","weight":"","dur":0,"dmg":0,"notes":""}],"channeling":{"source":"","vessel":"","control":"","vesselDur":2},"abilities":[{"name":"","origin":"Role","effectType":"","charges":"","cost":"","description":"what it looks like when used"},{"name":"","origin":"Archetype","effectType":"","charges":"","cost":"","description":""},{"name":"","origin":"Item","effectType":"","charges":"","cost":"","description":""}],"specialMove":{"name":"","shape":"","description":"mechanical effect","flavorText":"one sentence worth shouting"},"playabilityInsights":{"leadOut":"","aptitude":"","beware":"","atTheTable":""},"gmBrief":"4-6 sentences: flaw in plain terms, 3 encounter types for this player, 2 NPC hooks, 1 way IRIS might specifically target or connect with this player based on what they revealed"}`;
+
+// ── BOOT ──────────────────────────────────────
+const bootMsgs=['Initializing systems...','Loading Callista server data...','Connecting to American server...','Calibrating biometric scanner...','Player profile engine ready.','Welcome to the First Days.'];
+window.onload=function(){
+  let i=0,pct=0;
+  const bar=document.getElementById('bootBar'),status=document.getElementById('bootStatus');
+  const iv=setInterval(()=>{
+    pct+=3;bar.style.width=Math.min(pct,100)+'%';
+    if(i<bootMsgs.length&&pct>=(i+1)*16)status.textContent=bootMsgs[i++];
+    if(pct>=100){clearInterval(iv);setTimeout(()=>{fadeOut('bootScreen');fadeIn('scanScreen');beginScan();},600);}
+  },55);
+};
+
+function fadeOut(id){const el=document.getElementById(id);el.style.opacity='0';setTimeout(()=>el.classList.add('hidden'),500);}
+function fadeIn(id){const el=document.getElementById(id);el.classList.remove('hidden');el.style.opacity='0';requestAnimationFrame(()=>{el.style.opacity='1';});}
+
+const scanMsgs=['Reading biometric signature...','Cross-referencing player profile...','Analyzing psychographic markers...','Loading Callista world context...','Initializing adaptive interview engine...','First Days detected. Server Level 1.','Profile generation ready.'];
+function beginScan(){
+  let i=0;const sub=document.getElementById('scanSub');
+  const iv=setInterval(()=>{
+    if(i<scanMsgs.length)sub.textContent=scanMsgs[i++];
+    else{clearInterval(iv);setTimeout(()=>{fadeOut('scanScreen');fadeIn('chatScreen');startChat();},700);}
+  },520);
+}
+
+// ── API ───────────────────────────────────────
+// isGenerating=true means final character output — use Sonnet for quality
+// isGenerating=false means conversation turn — use Haiku for cost
+async function callClaude(messages, isGenerating=false){
+  // Keep system prompt + trim to last 10 messages to control token cost
+  const trimmed = messages.slice(-10);
+
+  const model = isGenerating ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
+  const maxTokens = isGenerating ? 2500 : 600;
+
+  const res=await fetch(`${RAILWAY_URL}/api/chat`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model, max_tokens:maxTokens, system:SYSTEM_PROMPT, messages:trimmed})
+  });
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'Server error '+res.status);}
+  const data=await res.json();
+  return data.content[0].text;
+}
+
+// ── CHAT ─────────────────────────────────────
+function startChat(){conversationHistory=[];currentPhase=0;updatePhaseUI();sendAIOpening();}
+
+async function sendAIOpening(){
+  showTyping();
+  const opener={role:'user',content:'Begin Phase 1. Open with a short atmospheric welcome — you are the game AI conducting a first-login biometric scan. Reference that the player is among the first wave in Callista, Server Level 1, First Days. Then ask for their name. 3-4 sentences. Be slightly uncanny — like you already know something about them.'};
+  conversationHistory.push(opener);
+  try{
+    const r=await callClaude(conversationHistory, false);
+    conversationHistory.push({role:'assistant',content:r});
+    hideTyping();addMessage('ai',r);enableInput();
+  }catch(e){hideTyping();addMessage('ai','Connection error: '+e.message+'. Please refresh.');}
+}
+
+async function sendMessage(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text||isTyping)return;
+  input.value='';input.style.height='auto';
+  disableInput();addMessage('user',text);
+  conversationHistory.push({role:'user',content:text});
+  detectPhase();showTyping();
+  // Use Sonnet for final generation turn, Haiku for all conversation turns
+  const isLastPhase = currentPhase >= 4;
+  try{
+    const r=await callClaude(conversationHistory, isLastPhase);
+    conversationHistory.push({role:'assistant',content:r});
+    hideTyping();
+    if(r.includes('GENERATION_COMPLETE')){
+      const beforeTag=r.split('GENERATION_COMPLETE')[0].trim();
+      if(beforeTag)addMessage('ai',beforeTag);
+      setTimeout(()=>parseAndShowResult(r),1200);
+    }else{
+      // If we're in last phase but didn't get GENERATION_COMPLETE, keep going with Sonnet
+      addMessage('ai',r);enableInput();
+    }
+  }catch(e){hideTyping();addMessage('ai','Something went wrong: '+e.message);enableInput();}
+}
+
+function detectPhase(){
+  const n=conversationHistory.filter(m=>m.role==='user').length;
+  if(n>=3&&currentPhase<1){currentPhase=1;updatePhaseUI();}
+  else if(n>=6&&currentPhase<2){currentPhase=2;updatePhaseUI();}
+  else if(n>=9&&currentPhase<3){currentPhase=3;updatePhaseUI();}
+  else if(n>=11&&currentPhase<4){currentPhase=4;updatePhaseUI();}
+}
+
+function updatePhaseUI(){
+  document.getElementById('phaseLabel').textContent=PHASES[currentPhase]||PHASES[4];
+  document.querySelectorAll('.phase-pip').forEach((p,i)=>{
+    p.classList.remove('active','done');
+    if(i<currentPhase)p.classList.add('done');
+    else if(i===currentPhase)p.classList.add('active');
+  });
+}
+
+function addMessage(role,text){
+  const msgs=document.getElementById('chatMessages');
+  const ti=document.getElementById('typingIndicator');if(ti)ti.remove();
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  const av=document.createElement('div');av.className='msg-avatar';av.textContent=role==='ai'?'LR':'YOU';
+  const bub=document.createElement('div');bub.className='msg-bubble';
+  bub.innerHTML=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
+  div.appendChild(av);div.appendChild(bub);msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping(){
+  isTyping=true;const msgs=document.getElementById('chatMessages');
+  if(document.getElementById('typingIndicator'))return;
+  const div=document.createElement('div');div.className='msg ai';div.id='typingIndicator';
+  const av=document.createElement('div');av.className='msg-avatar';av.textContent='LR';
+  const bub=document.createElement('div');bub.className='msg-bubble';
+  bub.innerHTML='<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  div.appendChild(av);div.appendChild(bub);msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function hideTyping(){isTyping=false;const el=document.getElementById('typingIndicator');if(el)el.remove();}
+function enableInput(){document.getElementById('chatInput').disabled=false;document.getElementById('sendBtn').disabled=false;document.getElementById('chatInput').focus();}
+function disableInput(){document.getElementById('chatInput').disabled=true;document.getElementById('sendBtn').disabled=true;}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+
+// ── RESULT PARSING ────────────────────────────
+function parseAndShowResult(raw){
+  let c=null;
+  try{
+    // Strip GENERATION_COMPLETE and any markdown fences, find the JSON object
+    const cleaned=raw.replace('GENERATION_COMPLETE','').replace(/```json/g,'').replace(/```/g,'').trim();
+    const start=cleaned.indexOf('{');
+    const end=cleaned.lastIndexOf('}');
+    if(start!==-1&&end!==-1){
+      c=JSON.parse(cleaned.substring(start,end+1));
+    }
+  }catch(e){console.error('JSON parse error:',e);}
+  characterData=c;
+  fadeOut('chatScreen');
+  setTimeout(()=>{fadeIn('resultScreen');c?renderResult(c):renderFallback(raw);},600);
+}
+
+function renderResult(c){
+  const el=document.getElementById('resultInner');
+  const statsHtml=Object.entries(c.stats||{}).map(([s,d])=>`<div class="stat-item"><div class="stat-die">${d}</div><div class="stat-name">${s}</div></div>`).join('');
+  const equipHtml=(c.equipment||[]).map(e=>`<div class="list-item"><span class="list-name">${e.name}</span><span class="list-note">${[e.weight,e.type,e.dur?'Dur '+e.dur:'',e.dmg?'Dmg '+e.dmg:'',e.notes].filter(Boolean).join(' · ')}</span></div>`).join('');
+  const featsHtml=(c.feats||[]).map(f=>`<div class="list-item"><span class="list-name">${f.name}</span><span class="list-note">${f.description||''}</span></div>`).join('');
+  const abilitiesHtml=(c.abilities||[]).map(a=>`<div class="ability-item"><div class="ability-name">${a.name}</div><div class="ability-body">${a.description}</div><div class="ability-cost">${a.origin} · ${a.charges||''} · ${a.cost||''}</div></div>`).join('');
+  const channelingHtml=c.channeling?.source?`<div class="result-card full"><div class="rc-label">Channeling Trinity</div><div class="rc-body"><strong>Source:</strong> ${c.channeling.source}<br><strong>Vessel:</strong> ${c.channeling.vessel} (Dur ${c.channeling.vesselDur||2})<br><strong>Control:</strong> ${c.channeling.control}</div></div>`:'';
+
+  el.innerHTML=`
+    <div class="result-header">
+      <div class="result-eyebrow">// Character generation complete · First Days · Server Level 1</div>
+      <div class="result-name" id="charNameDisplay">${c.archetypeTitle||c.characterName||'Your Character'}</div>
+      <div class="result-archetype">${c.role||''} · ${c.archetype||''}</div>
+      <div class="result-tags">
+        <span class="result-tag primary">${c.role||''}</span>
+        <span class="result-tag primary">${c.archetype||''}</span>
+        <span class="result-tag">${c.startingNation||''}</span>
+        <span class="result-tag">${c.emberCourtPatron||''}</span>
+        <span class="result-tag flaw">${c.flaw?.name||''}</span>
+      </div>
+    </div>
+    <div class="result-grid">
+      <div class="result-card full"><div class="rc-label">The Herald Speaks</div><div class="herald-text">${c.herald||''}</div></div>
+      <div class="result-card"><div class="rc-label">Stats</div><div class="stat-grid">${statsHtml}</div></div>
+      <div class="result-card"><div class="rc-label">Callista Placement</div><div class="rc-body"><strong>Nation:</strong> ${c.startingNation||'—'}<br><strong>Patron:</strong> ${c.emberCourtPatron||'None'}</div></div>
+      <div class="result-card full"><div class="rc-label">Equipment</div>${equipHtml}</div>
+      <div class="result-card full"><div class="rc-label">Feats</div>${featsHtml}</div>
+      <div class="result-card full danger"><div class="rc-label">Flaw — ${c.flaw?.name||''}</div><div class="rc-body" style="font-style:italic;margin-bottom:8px">${c.flaw?.description||''}</div><div class="rc-body">${c.flaw?.howItPlays||''}</div></div>
+      ${channelingHtml}
+      <div class="result-card full"><div class="rc-label">Abilities</div>${abilitiesHtml}</div>
+      <div class="result-card full special"><div class="rc-label">Special Move</div><div class="rc-title">${c.specialMove?.name||''}</div><div class="rc-body" style="font-style:italic;margin-bottom:8px">"${c.specialMove?.flavorText||''}"</div><div class="rc-body"><strong>Shape:</strong> ${c.specialMove?.shape||''} · <strong>Cost:</strong> 6 TEN or 2 HP · Auto-succeeds · 1×/Scene<br>${c.specialMove?.description||''}</div></div>
+      <div class="result-card"><div class="rc-label">Lead out on</div><div class="rc-body">${c.playabilityInsights?.leadOut||'—'}</div></div>
+      <div class="result-card"><div class="rc-label">Aptitude</div><div class="rc-body">${c.playabilityInsights?.aptitude||'—'}</div></div>
+      <div class="result-card"><div class="rc-label">Beware</div><div class="rc-body">${c.playabilityInsights?.beware||'—'}</div></div>
+      <div class="result-card"><div class="rc-label">At the table</div><div class="rc-body">${c.playabilityInsights?.atTheTable||'—'}</div></div>
+    </div>
+    <div class="result-actions">
+      <button class="action-btn primary" onclick="window.print()">Save as PDF</button>
+      <button class="action-btn ghost" onclick="location.reload()">New Character</button>
+    </div>
+    <div class="email-status" id="emailStatus">Sending GM brief...</div>
+  `;
+
+  setTimeout(()=>{
+    const n=document.getElementById('charNameDisplay');
+    if(n)n.classList.add('glitch');
+  },400);
+
+  sendGMEmail(c);
+}
+
+// ── EMAIL ─────────────────────────────────────
+async function sendGMEmail(c){
+  const statusEl=document.getElementById('emailStatus');
+  if(!c){if(statusEl){statusEl.textContent='No character data to send.';statusEl.className='email-status err';}return;}
+
+  const statsText=Object.entries(c.stats||{}).map(([s,d])=>`${s}: ${d}`).join(' · ');
+  const featsText=(c.feats||[]).map(f=>`${f.name} — ${f.description}`).join('\n');
+  const equipText=(c.equipment||[]).map(e=>`${e.name} (${e.weight||''} ${e.type||''}, Dur ${e.dur||'?'}${e.dmg?', Dmg '+e.dmg:''}) — ${e.notes||''}`).join('\n');
+  const channelingText=c.channeling?.source?`Source: ${c.channeling.source}\nVessel: ${c.channeling.vessel} (Dur ${c.channeling.vesselDur||2})\nControl: ${c.channeling.control}`:'None';
+  const abilitiesText=(c.abilities||[]).map(a=>`${a.name} [${a.origin}] — ${a.description} | ${a.charges||''} · ${a.cost||''}`).join('\n');
+  const specialMoveText=`${c.specialMove?.name||''} (${c.specialMove?.shape||''})\n"${c.specialMove?.flavorText||''}"\n${c.specialMove?.description||''}\nCost: 6 TEN or 2 HP · Auto-succeeds · 1×/Scene`;
+
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+      player_name:       c.playerName||'Unknown',
+      archetype_title:   c.archetypeTitle||'',
+      role:              c.role||'',
+      archetype:         c.archetype||'',
+      starting_nation:   c.startingNation||'',
+      patron:            c.emberCourtPatron||'None',
+      stats:             statsText,
+      feats:             featsText,
+      flaw_name:         c.flaw?.name||'',
+      flaw_description:  c.flaw?.description||'',
+      flaw_how_it_plays: c.flaw?.howItPlays||'',
+      equipment:         equipText,
+      channeling:        channelingText,
+      abilities:         abilitiesText,
+      special_move_name: c.specialMove?.name||'',
+      special_move:      specialMoveText,
+      lead_out:          c.playabilityInsights?.leadOut||'',
+      aptitude:          c.playabilityInsights?.aptitude||'',
+      beware:            c.playabilityInsights?.beware||'',
+      at_the_table:      c.playabilityInsights?.atTheTable||'',
+      herald:            c.herald||'',
+      gm_brief:          c.gmBrief||'',
+    });
+    if(statusEl){statusEl.textContent='✓ GM brief sent to your email.';statusEl.className='email-status ok';}
+  }catch(e){
+    console.error('EmailJS error:',e);
+    if(statusEl){statusEl.textContent='Email failed — screenshot this page and send to your GM. Error: '+e.text;statusEl.className='email-status err';}
+  }
+}
+
+function renderFallback(raw){
+  document.getElementById('resultInner').innerHTML=`
+    <div class="result-header"><div class="result-eyebrow">// Generation complete</div><div class="result-name" style="font-size:20px">Character Generated</div></div>
+    <div class="result-card full"><div class="rc-label">Raw Output — copy this and send to your GM</div><div class="rc-body" style="white-space:pre-wrap;font-size:11px;line-height:1.6;user-select:all">${raw}</div></div>
+    <div class="result-actions"><button class="action-btn ghost" onclick="location.reload()">Start over</button></div>`;
+}
+</script>
+</body>
+</html>
